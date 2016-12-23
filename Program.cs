@@ -135,6 +135,8 @@ namespace Steam_Friend_Bot
 
             isRunning = true;
 
+            Console.Title = "Steam Bot - Connecting...";
+
             steamClient.Connect();
 
             while (isRunning)
@@ -148,13 +150,15 @@ namespace Steam_Friend_Bot
         {
             if (callback.Result != EResult.OK)
             {
+                Console.Title = "Steam Bot - Connection Error!";
                 Console.WriteLine($"(ERROR) Unable to connect to steam => {callback.Result}");
                 Console.WriteLine($"(HELP US) Screenshot this error and send it to us!");
                 isRunning = false;
                 return;
             }
-            Console.WriteLine("\n(INFORMATION) Connected to Steam!");
+            Console.WriteLine("(INFORMATION) Connected to Steam!");
             Console.WriteLine($"(INFORMATION) Logging in with account {user}");
+            Console.Title = $"Steam Bot - Logging in with {user}";
 
             #region Update Sentry (Steam Guard)
             byte[] sentryHash = null;
@@ -178,7 +182,7 @@ namespace Steam_Friend_Bot
         } // Wird gecalled wenn wir zu Steam connecten
         static void OnDisconnected(SteamClient.DisconnectedCallback callback)
         {
-            Console.Title = $"SteamBot - Reconnecting (Try: {reconnectTry})";
+            Console.Title = $"SteamBot - Reconnecting (Current Try: {reconnectTry++})";
             if (reconnectTry == 0)
                 Console.WriteLine("(INFORMATION) Reconnecting to Steam...");
             if (reconnectTry > 1 && reconnectTry < 3)
@@ -195,7 +199,7 @@ namespace Steam_Friend_Bot
 
         static void OnLoggedOn(SteamUser.LoggedOnCallback callback)
         {
-           
+            Console.Title = $"Steam Bot - Logged on with user '{user}'";
             if(loggedBackOn)
             {
                 Console.Clear();
@@ -208,14 +212,16 @@ namespace Steam_Friend_Bot
             {
                 var email = callback.EmailDomain;
 
+                Console.Title = "Steam Bot - Awaiting Steam Guard";
                 Console.WriteLine($"\n(PROTECTED) The account {user} is Steam Guard protected");
-                Console.Write($"(INFORMATION) Please enter your SteamGuard code, Steam sent you to your gmail at: xxx@{email}");
+                Console.Write($"(INFORMATION) Please enter your SteamGuard code, Steam sent you to your gmail at xxx@{email}: ");
 
                 authcode = Console.ReadLine();
                 return;
             }
             if (callback.Result == EResult.AccountLoginDeniedNeedTwoFactor)
             {
+                Console.Title = "Steam Bot - Awaiting 2FA Code";
                 Console.WriteLine($"\n(PROTECTED) The account {user} uses Two-Factor Authentication");
                 Console.Write("(INFORMATION) Please enter your 2FA code, you got on your phone: ");
 
@@ -248,6 +254,7 @@ namespace Steam_Friend_Bot
         } // Wird gecalled wenn wir uns einloggen
         static void OnLoggedOff(SteamUser.LoggedOffCallback callback)
         {
+            Console.Title = "Steam Bot - Logged off";
             Console.WriteLine($"(WARNING) Steam logged us of: {callback.Result}");
             Console.WriteLine("(HELP US) Please send us a screenshot of this error!");
             Console.WriteLine("(INFO) Logging back in.");
@@ -267,6 +274,7 @@ namespace Steam_Friend_Bot
         static void UpdateMachineAuthCallback(SteamUser.UpdateMachineAuthCallback callback)
         {
             Console.Clear();
+            Console.Title = "Steam Bot - Updating Account Information";
             Console.WriteLine("(STEAM GUARD) Updating Sentry File...");
 
             byte[] sentryHash = CryptoHelper.SHAHash(callback.Data);
