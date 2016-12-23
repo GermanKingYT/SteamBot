@@ -9,6 +9,7 @@ using System.Threading;
 using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Net;
+using System.Drawing;
 
 using SteamKit2;
 using SteamKit2.Internal;
@@ -21,6 +22,8 @@ using SteamKit2.GC.CSGO;
 using SteamKit2.GC.CSGO.Internal;
 
 using SteamBot.Helpers;
+
+using Console = Colorful.Console;
 
 using CsgoClient = SteamKit.CSGO.CsgoClient;
 
@@ -87,7 +90,11 @@ namespace Steam_Friend_Bot
                 File.WriteAllText("chat.txt", "Ping | Pong");
             }
 
-            Console.Title = "Steam Bot - Init...";
+            Console.Title = "Steam Bot - Awaiting....";
+
+            Console.WriteLine("SteamBot v1.4", Color.Purple);
+            Console.WriteLine("Created by Logxn", Color.Purple);
+            Console.WriteLine("http://www.github.com/Logxn\n", Color.Purple);
 
             Console.Write("Username: ");
             user = Console.ReadLine();
@@ -151,13 +158,13 @@ namespace Steam_Friend_Bot
             if (callback.Result != EResult.OK)
             {
                 Console.Title = "Steam Bot - Connection Error!";
-                Console.WriteLine($"(ERROR) Unable to connect to steam => {callback.Result}");
-                Console.WriteLine($"(HELP US) Screenshot this error and send it to us!");
+                Console.WriteLine($"(ERROR) Unable to connect to steam => {callback.Result}", Color.Red);
+                Console.WriteLine($"(HELP US) Screenshot this error and send it to us!", Color.Yellow);
                 isRunning = false;
                 return;
             }
-            Console.WriteLine("(INFORMATION) Connected to Steam!");
-            Console.WriteLine($"(INFORMATION) Logging in with account {user}");
+            Console.WriteLine("(SUCCESS) Connected to Steam!", Color.ForestGreen);
+            Console.WriteLine($"(INFORMATION) Logging in with account {user}", Color.SkyBlue);
             Console.Title = $"Steam Bot - Logging in with {user}";
 
             #region Update Sentry (Steam Guard)
@@ -184,11 +191,11 @@ namespace Steam_Friend_Bot
         {
             Console.Title = $"SteamBot - Reconnecting (Current Try: {reconnectTry++})";
             if (reconnectTry == 0)
-                Console.WriteLine("(INFORMATION) Reconnecting to Steam...");
+                Console.WriteLine("(INFORMATION) Reconnecting to Steam...", Color.SkyBlue);
             if (reconnectTry > 1 && reconnectTry < 3)
             {
-                Console.WriteLine("(WARNING) We couldn't establish a connection yet! Steam Server down?");
-                Console.WriteLine("(WARNING) Still trying to connect...");
+                Console.WriteLine("(WARNING) We couldn't establish a connection yet! Steam Server down?", Color.OrangeRed);
+                Console.WriteLine("(WARNING) Still trying to connect...", Color.OrangeRed);
             }
 
             Thread.Sleep(TimeSpan.FromSeconds(5));
@@ -203,7 +210,7 @@ namespace Steam_Friend_Bot
             if(loggedBackOn)
             {
                 Console.Clear();
-                Console.WriteLine("(SUCCESS) Logged back on.");
+                Console.WriteLine("(SUCCESS) Logged back on.", Color.ForestGreen);
                 loggedBackOn = false;
             }
 
@@ -213,8 +220,8 @@ namespace Steam_Friend_Bot
                 var email = callback.EmailDomain;
 
                 Console.Title = "Steam Bot - Awaiting Steam Guard";
-                Console.WriteLine($"\n(PROTECTED) The account {user} is Steam Guard protected");
-                Console.Write($"(INFORMATION) Please enter your SteamGuard code, Steam sent you to your gmail at xxx@{email}: ");
+                Console.WriteLine($"\n(PROTECTED) The account {user} is Steam Guard protected", Color.SkyBlue);
+                Console.Write($"(INFORMATION) Please enter your SteamGuard code, Steam sent you to your gmail at xxx@{email}: ", Color.SkyBlue);
 
                 authcode = Console.ReadLine();
                 return;
@@ -222,42 +229,43 @@ namespace Steam_Friend_Bot
             if (callback.Result == EResult.AccountLoginDeniedNeedTwoFactor)
             {
                 Console.Title = "Steam Bot - Awaiting 2FA Code";
-                Console.WriteLine($"\n(PROTECTED) The account {user} uses Two-Factor Authentication");
-                Console.Write("(INFORMATION) Please enter your 2FA code, you got on your phone: ");
+                Console.WriteLine($"\n(PROTECTED) The account {user} uses Two-Factor Authentication", Color.SkyBlue);
+                Console.Write("(INFORMATION) Please enter your 2FA code, you got on your phone: ", Color.SkyBlue);
 
                 twofactor = Console.ReadLine();
+                Console.Clear();
                 return;
             }
             if (callback.Result == EResult.TwoFactorCodeMismatch)
             {
-                Console.WriteLine("\n(REJECTED) Wrong TwoFactor Code.");
+                Console.WriteLine("\n(REJECTED) Wrong TwoFactor Code.", Color.Red);
                 isRunning = false;
                 return;
             }
             if (callback.Result == EResult.InvalidPassword)
             {
-                Console.WriteLine("(REJECTED) Wrong password.");
+                Console.WriteLine("(REJECTED) Wrong password.", Color.Red);
                 isRunning = false;
                 return;
             }            
             if (callback.Result != EResult.OK)
             {
-                Console.WriteLine($"(ERROR) Unable to connect to Steam => {callback.Result}");
-                Console.WriteLine($"(HELP US) Send us a screenshot of this error!");
+                Console.WriteLine($"(ERROR) Unable to connect to Steam => {callback.Result}", Color.Red);
+                Console.WriteLine($"(HELP US) Send us a screenshot of this error!", Color.Yellow);
                 isRunning = false;
                 return;
             }
             #endregion
 
             Console.Clear();
-            Console.WriteLine("(SUCCESS) Logged in!");
+            Console.WriteLine("(SUCCESS) Logged in!\n", Color.ForestGreen);
         } // Wird gecalled wenn wir uns einloggen
         static void OnLoggedOff(SteamUser.LoggedOffCallback callback)
         {
             Console.Title = "Steam Bot - Logged off";
-            Console.WriteLine($"(WARNING) Steam logged us of: {callback.Result}");
-            Console.WriteLine("(HELP US) Please send us a screenshot of this error!");
-            Console.WriteLine("(INFO) Logging back in.");
+            Console.WriteLine($"(WARNING) Steam logged us of: {callback.Result}", Color.OrangeRed);
+            Console.WriteLine("(HELP US) Please send us a screenshot of this error!", Color.Yellow);
+            Console.WriteLine("(INFORMATION) Logging back in.", Color.SkyBlue);
 
             steamUser.LogOn(new SteamUser.LogOnDetails
             {
@@ -275,7 +283,7 @@ namespace Steam_Friend_Bot
         {
             Console.Clear();
             Console.Title = "Steam Bot - Updating Account Information";
-            Console.WriteLine("(STEAM GUARD) Updating Sentry File...");
+            Console.WriteLine("(STEAM GUARD) Updating Sentry File...", Color.SkyBlue);
 
             byte[] sentryHash = CryptoHelper.SHAHash(callback.Data);
 
@@ -294,8 +302,7 @@ namespace Steam_Friend_Bot
                 SentryFileHash = sentryHash,
                 
             });
-            Console.WriteLine("(STEAM GUARD) Done!");
-            Thread.Sleep(3000);
+            Console.WriteLine("(STEAM GUARD) Done!", Color.SkyBlue);
             Console.Clear();
         } // Wird gecalled wenn wir das erste mal Steam Guard authentifizieren
 
@@ -327,7 +334,7 @@ namespace Steam_Friend_Bot
                         {
                             case "!coder":
                                 args = Misc.seperate(0, ' ',callback.Message );
-                                Console.WriteLine($"(INFORMATION) Your Steamfriend {sender} has used the command !coder");
+                                Console.WriteLine($"(INFORMATION) Your Steamfriend {sender} has used the command !coder", Color.SkyBlue);
                                 steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, "Coded by Logxn (github.com/Logxn/)");
                                 steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, "Coded using C#"); 
                             break;
@@ -383,12 +390,12 @@ namespace Steam_Friend_Bot
                                 break;*/
                             #endregion
                             case "!steamID":
-                                Console.WriteLine("(INFORMATION) Your Steamfriend {sender} has used the Command !steamID");
+                                Console.WriteLine("(INFORMATION) Your Steamfriend {sender} has used the Command !steamID", Color.SkyBlue);
                                 steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, $"Your SteamID is: {callback.Sender}");
 
                             break;
                             case "!friends":
-                                Console.WriteLine($"(INFORMATION) Your Steamfriend {sender} has used !friends");
+                                Console.WriteLine($"(INFORMATION) Your Steamfriend {sender} has used !friends", Color.SkyBlue);
                                 for(int i = 0; i < steamFriends.GetFriendCount(); i++)
                                 {
                                     SteamID friend = steamFriends.GetFriendByIndex(i);
@@ -400,7 +407,7 @@ namespace Steam_Friend_Bot
                                     // ?!?!?!?!?!?!?!!?!?!? :^)
                             break;
                             case "!commands":
-                                Console.WriteLine($"(INFORMATION) I listed some commands to {sender}");
+                                Console.WriteLine($"(INFORMATION) I listed some commands to {sender}", Color.SkyBlue);
                                 steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, "Commandlist:");
                                 steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, "!steamID - Get your SteamID");
                                 steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, "!friends - Get my Friendslist");
@@ -472,16 +479,16 @@ namespace Steam_Friend_Bot
                     SteamID friend = steamFriends.GetFriendByIndex(i);
                     if (steamFriends.GetFriendPersonaState(friend) != EPersonaState.Online)
                         continue;
-                    Console.WriteLine("Friend: " + steamFriends.GetFriendPersonaName(friend) + " State: " + steamFriends.GetFriendPersonaState(friend));              
+                    Console.WriteLine("(FRIENDS) Friend: " + steamFriends.GetFriendPersonaName(friend) + " State: " + steamFriends.GetFriendPersonaState(friend), Color.Violet);              
                 }
             }
 
-            Console.WriteLine($"You have {friendCount} friends on this account.\n");
+            Console.WriteLine($"(FRIENDS) You have {friendCount} friends on this account.\n", Color.Violet);
         } // Wird gecalled wenn Steam durch die Freundesliste crawled.
 
         static void OnFriendAdded(SteamFriends.FriendAddedCallback callback)
         {     
-            Console.WriteLine($"(INFORMATION) {callback.PersonaName} is now a friend");
+            Console.WriteLine($"(INFORMATION) {callback.PersonaName} is now a friend", Color.SkyBlue);
         } // Weiß noch nicht ganz für was das ist, Steam ist gerade down (23.12.16 19:18)
                                                                                 // Nein ich bin kein retard. weiß nur nicht ob das für, wenn wir adden oder wenn uns einer added?!
 
