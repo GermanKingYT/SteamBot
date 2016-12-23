@@ -464,7 +464,6 @@ namespace Steam_Friend_Bot
                     SteamID friend = steamFriends.GetFriendByIndex(i);
                     if (steamFriends.GetFriendPersonaState(friend) != EPersonaState.Online)
                         continue;
-                    Console.WriteLine("Current Online Friends:\n");
                     Console.WriteLine("Friend: " + steamFriends.GetFriendPersonaName(friend) + " State: " + steamFriends.GetFriendPersonaState(friend));              
                 }
             }
